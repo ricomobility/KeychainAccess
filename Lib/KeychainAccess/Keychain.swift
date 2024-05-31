@@ -541,6 +541,12 @@ public final class Keychain {
         options.synchronizable = synchronizable
         return Keychain(options)
     }
+    
+    public func dataProtection(_ protection: Bool) -> Keychain {
+        var options = self.options
+        options.dataProtection = protection
+        return Keychain(options)
+    }
 
     public func label(_ label: String) -> Keychain {
         var options = self.options
@@ -1209,6 +1215,7 @@ struct Options {
     var authenticationPolicy: AuthenticationPolicy?
 
     var synchronizable: Bool = false
+    var dataProtection: Bool = false
 
     var label: String?
     var comment: String?
@@ -1251,6 +1258,9 @@ private let AttributePort = String(kSecAttrPort)
 private let AttributePath = String(kSecAttrPath)
 
 private let SynchronizableAny = kSecAttrSynchronizableAny
+
+@available(iOS 13.0, macOS 13.1, *)
+private let UseDataProtectionKeychain = String(kSecUseDataProtectionKeychain)
 
 /** Search Constants */
 private let MatchLimit = String(kSecMatchLimit)
@@ -1330,6 +1340,10 @@ extension Options {
             query[AttributeSynchronizable] = SynchronizableAny
         } else {
             query[AttributeSynchronizable] = synchronizable ? kCFBooleanTrue : kCFBooleanFalse
+        }
+        
+        if #available(iOS 13.0, macOS 13.1, *) {
+            query[UseDataProtectionKeychain] = dataProtection ? kCFBooleanTrue : kCFBooleanFalse
         }
 
         switch itemClass {
